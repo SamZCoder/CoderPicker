@@ -29,18 +29,6 @@ namespace CoderPicker.App
             InitializeComponent();
         }
 
-        private void canvasPanel_Paint(object sender, PaintEventArgs e)
-        {
-            Graphics graphic = saturationCanvas.CreateGraphics();
-            
-            
-        }
-
-        private void hueCanvas_Paint(object sender, PaintEventArgs e)
-        {
-            new HueGenerator(new Size(hueCanvas.Width, hueCanvas.Height)).ToGraphics(e.Graphics);
-        }
-
         private void hueCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             HueChangeActive = true;
@@ -58,14 +46,12 @@ namespace CoderPicker.App
             try
             {
                 Point CurrentLocation = CoordinatesHelper.ClipLocationToBounds(e.Location, hueCanvas.Size);
-                Bitmap bmp = new Bitmap(hueCanvas.Width-2, hueCanvas.Height-2);
-                hueCanvas.DrawToBitmap(bmp, new Rectangle(0, 0, hueCanvas.Width-1, hueCanvas.Height-1));
+                Bitmap bmp = new Bitmap(hueCanvas.Width, hueCanvas.Height);
+                hueCanvas.DrawToBitmap(bmp, new Rectangle(0, 0, hueCanvas.Width, hueCanvas.Height));
                 if (HueChangeActive)
                 {
                     SelectedHue = bmp.GetPixel(CurrentLocation.X, CurrentLocation.Y);
-                    hueRedText.Text = SelectedHue.R.ToString();
-                    hueGreenText.Text = SelectedHue.G.ToString();
-                    hueBlueText.Text = SelectedHue.B.ToString();
+                    SetCurrentColorInfo();
 
                     CreateSaturationCanvas();
                 }
@@ -79,42 +65,23 @@ namespace CoderPicker.App
 
         private void CreateSaturationCanvas()
         {
-            //Int32 RedToBlackFactor = (Int32)Math.Round((1f/((SelectedHue.R)/255f)));
-            //Int32 GreenToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.G) / 255f)));
-            //Int32 BlueToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.B) / 255f)));
-            //Color NextEndColor = Color.White;
-            //Color NextHue = SelectedHue;
-            //Bitmap tempBitmap = new Bitmap(510, 510);
-            //Graphics graphics = Graphics.FromImage(tempBitmap);
-            //Int32 CurrentYPosition = 1;
-            //while(CurrentYPosition <= tempBitmap.Height-2)
-            //{
-            //    NextHue = Color.FromArgb(
-            //        255,
-            //        NextHue.R - Math.Max(((((CurrentYPosition / 2) % RedToBlackFactor) == 0 && RedToBlackFactor > 0) ? 1 : 0), 0),
-            //        NextHue.G - Math.Max(((((CurrentYPosition / 2) % GreenToBlackFactor) == 0 && GreenToBlackFactor > 0) ? 1 : 0), 0),
-            //        NextHue.B - Math.Max(((((CurrentYPosition / 2) % BlueToBlackFactor) == 0 && BlueToBlackFactor > 0) ? 1 : 0), 0)
-            //    );
-            //    LinearGradientBrush gradient = new LinearGradientBrush(new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2), NextEndColor, NextHue, 0f);
-            //    graphics.FillRectangle(gradient, new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2));
-            //    NextEndColor = Color.FromArgb(255, NextEndColor.R-1, NextEndColor.G-1, NextEndColor.B-1);
-
-            //    CurrentYPosition += 2;
-            //}
-            //saturationCanvas.BackgroundImage = tempBitmap;
-            //saturationCanvas.BackgroundImageLayout = ImageLayout.Stretch;
-            SaturationGenerator Generator = new SaturationGenerator(SelectedHue, new Size(512, 512));
-            Bitmap tempBitmap = new Bitmap(512, 512);
-            Graphics graphics = Graphics.FromImage(tempBitmap);
-            Generator.ToGraphics(graphics);
-            saturationCanvas.BackgroundImage = tempBitmap;
+            SaturationGenerator saturation = new SaturationGenerator(SelectedHue, saturationCanvas.Size);
+            saturationCanvas.BackgroundImage = saturation.ToBitmap();
             saturationCanvas.BackgroundImageLayout = ImageLayout.Stretch;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            SelectedHue = Color.Red;
             currentColorCanvas.BackColor = SelectedHue;
+
+            //Hue Map
+            HueGenerator HueGen = new HueGenerator(new Size(hueCanvas.Width, hueCanvas.Height));
+            hueCanvas.BackgroundImage = HueGen.ToBitmap();
+            hueCanvas.BackgroundImageLayout = ImageLayout.Stretch;
+
             CreateSaturationCanvas();
+            SetCurrentColorInfo();
         }
 
         private void saturationCanvas_MouseDown(object sender, MouseEventArgs e)
@@ -125,6 +92,7 @@ namespace CoderPicker.App
 
         private void saturationCanvas_MouseUp(object sender, MouseEventArgs e)
         {
+
             SaturationChangeActive = false;
         }
 
@@ -134,16 +102,13 @@ namespace CoderPicker.App
             {
                 Bitmap bmp = new Bitmap(saturationCanvas.Width, saturationCanvas.Height);
                 saturationCanvas.DrawToBitmap(bmp, new Rectangle(0, 0, saturationCanvas.Width, saturationCanvas.Height));
-
-                hoverCanvas.BackColor = bmp.GetPixel(e.X, e.Y);
+                Point CurrentLocation = CoordinatesHelper.ClipLocationToBounds(e.Location, saturationCanvas.Size);
+                hoverCanvas.BackColor = bmp.GetPixel(CurrentLocation.X, CurrentLocation.Y);
                 if (SaturationChangeActive)
                 {
-                    SelectedColor = bmp.GetPixel(e.X, e.Y);
+                    SelectedColor = bmp.GetPixel(CurrentLocation.X, CurrentLocation.Y);
                     currentColorCanvas.BackColor = SelectedColor;
-                    currentRedText.Text = SelectedColor.R.ToString();
-                    currentGreenText.Text = SelectedColor.G.ToString();
-                    currentBlueText.Text = SelectedColor.B.ToString();
-                    currentHexText.Text = SelectedColor.ToHtml();
+                    SetCurrentColorInfo();
                     
                 }
             }
@@ -151,6 +116,27 @@ namespace CoderPicker.App
             {
 
             }
+        }
+
+        private void SetCurrentColorInfo()
+        {
+            //RGB
+            currentRedText.Text = SelectedColor.R.ToString();
+            currentGreenText.Text = SelectedColor.G.ToString();
+            currentBlueText.Text = SelectedColor.B.ToString();
+            //HSL
+            //currentHueText.Text = SelectedColor.CalculateHue().ToString();
+            currentSaturationText.Text = SelectedColor.GetSaturation().ToString("P0");
+            currentLightText.Text = SelectedColor.GetBrightness().ToString("P0");
+
+
+            //Hue
+            hueRedText.Text = SelectedHue.R.ToString();
+            hueGreenText.Text = SelectedHue.G.ToString();
+            hueBlueText.Text = SelectedHue.B.ToString();
+
+            currentHexText.Text = SelectedColor.ToHtml();
+            rgbCodeText.Text = $"({SelectedColor.R},{SelectedColor.G},{SelectedColor.B})";
         }
     }
 }
