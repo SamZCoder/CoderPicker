@@ -89,5 +89,9 @@
       <Name>CoderPicker.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\coder-picker-logo.png" />
+    <None Include="Resources\coder-picker-logo.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

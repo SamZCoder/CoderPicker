@@ -138,5 +138,10 @@ namespace CoderPicker.App
             currentHexText.Text = SelectedColor.ToHtml();
             rgbCodeText.Text = $"({SelectedColor.R},{SelectedColor.G},{SelectedColor.B})";
         }
+
+        private void OutputText_Click(object sender, EventArgs e)
+        {
+            if(autoCopyCheckbox.Checked) { Clipboard.SetText(((TextBox)sender).Text); }
+        }
     }
 }
