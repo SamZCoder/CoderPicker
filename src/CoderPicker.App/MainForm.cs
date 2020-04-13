@@ -79,31 +79,36 @@ namespace CoderPicker.App
 
         private void CreateSaturationCanvas()
         {
-            Int32 RedToBlackFactor = (Int32)Math.Round((1f/((SelectedHue.R)/255f)));
-            Int32 GreenToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.G) / 255f)));
-            Int32 BlueToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.B) / 255f)));
-            Color NextEndColor = Color.White;
-            Color NextHue = SelectedHue;
-            Bitmap tempBitmap = new Bitmap(510, 510);
+            //Int32 RedToBlackFactor = (Int32)Math.Round((1f/((SelectedHue.R)/255f)));
+            //Int32 GreenToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.G) / 255f)));
+            //Int32 BlueToBlackFactor = (Int32)Math.Round((1f / ((SelectedHue.B) / 255f)));
+            //Color NextEndColor = Color.White;
+            //Color NextHue = SelectedHue;
+            //Bitmap tempBitmap = new Bitmap(510, 510);
+            //Graphics graphics = Graphics.FromImage(tempBitmap);
+            //Int32 CurrentYPosition = 1;
+            //while(CurrentYPosition <= tempBitmap.Height-2)
+            //{
+            //    NextHue = Color.FromArgb(
+            //        255,
+            //        NextHue.R - Math.Max(((((CurrentYPosition / 2) % RedToBlackFactor) == 0 && RedToBlackFactor > 0) ? 1 : 0), 0),
+            //        NextHue.G - Math.Max(((((CurrentYPosition / 2) % GreenToBlackFactor) == 0 && GreenToBlackFactor > 0) ? 1 : 0), 0),
+            //        NextHue.B - Math.Max(((((CurrentYPosition / 2) % BlueToBlackFactor) == 0 && BlueToBlackFactor > 0) ? 1 : 0), 0)
+            //    );
+            //    LinearGradientBrush gradient = new LinearGradientBrush(new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2), NextEndColor, NextHue, 0f);
+            //    graphics.FillRectangle(gradient, new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2));
+            //    NextEndColor = Color.FromArgb(255, NextEndColor.R-1, NextEndColor.G-1, NextEndColor.B-1);
+
+            //    CurrentYPosition += 2;
+            //}
+            //saturationCanvas.BackgroundImage = tempBitmap;
+            //saturationCanvas.BackgroundImageLayout = ImageLayout.Stretch;
+            SaturationGenerator Generator = new SaturationGenerator(SelectedHue, new Size(512, 512));
+            Bitmap tempBitmap = new Bitmap(512, 512);
             Graphics graphics = Graphics.FromImage(tempBitmap);
-            Int32 CurrentYPosition = 1;
-            while(CurrentYPosition <= tempBitmap.Height-2)
-            {
-                NextHue = Color.FromArgb(
-                    255,
-                    NextHue.R - Math.Max(((((CurrentYPosition / 2) % RedToBlackFactor) == 0 && RedToBlackFactor > 0) ? 1 : 0), 0),
-                    NextHue.G - Math.Max(((((CurrentYPosition / 2) % GreenToBlackFactor) == 0 && GreenToBlackFactor > 0) ? 1 : 0), 0),
-                    NextHue.B - Math.Max(((((CurrentYPosition / 2) % BlueToBlackFactor) == 0 && BlueToBlackFactor > 0) ? 1 : 0), 0)
-                );
-                LinearGradientBrush gradient = new LinearGradientBrush(new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2), NextEndColor, NextHue, 0f);
-                graphics.FillRectangle(gradient, new Rectangle(0, CurrentYPosition - 1, tempBitmap.Width, 2));
-                NextEndColor = Color.FromArgb(255, NextEndColor.R-1, NextEndColor.G-1, NextEndColor.B-1);
-                
-                CurrentYPosition += 2;
-            }
+            Generator.ToGraphics(graphics);
             saturationCanvas.BackgroundImage = tempBitmap;
             saturationCanvas.BackgroundImageLayout = ImageLayout.Stretch;
-            
         }
 
         private void MainForm_Load(object sender, EventArgs e)
